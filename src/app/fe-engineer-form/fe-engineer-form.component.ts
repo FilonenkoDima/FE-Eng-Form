@@ -1,8 +1,9 @@
 import { FeEngineerFormService } from './fe-engineer-form.service';
 
-import {Component, inject, OnInit} from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
-  AbstractControl, FormArray,
+  AbstractControl,
+  FormArray,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -14,10 +15,10 @@ import { MatInput, MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
 import { DatePipe } from '@angular/common';
 import { of } from 'rxjs';
-import {MatIcon} from '@angular/material/icon';
-import {MatButton, MatIconButton} from '@angular/material/button';
-import {MatToolbar} from '@angular/material/toolbar';
-import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
+import { MatIcon } from '@angular/material/icon';
+import { MatButton, MatIconButton } from '@angular/material/button';
+import { MatToolbar } from '@angular/material/toolbar';
+import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
 function emailIsUnique(control: AbstractControl) {
   if (control.value !== 'test@test.test') {
@@ -40,7 +41,7 @@ function emailIsUnique(control: AbstractControl) {
     MatIconButton,
     MatButton,
     MatToolbar,
-    NgbModule
+    NgbModule,
   ],
   templateUrl: './fe-engineer-form.component.html',
   styleUrl: './fe-engineer-form.component.css',
@@ -73,20 +74,35 @@ export class FeEngineerFormComponent implements OnInit {
     }),
     hobbies: new FormArray([], Validators.required),
   });
-  private datePipe = inject(DatePipe);
-  private feTechnologiesVersionsService = inject(FeEngineerFormService);
 
-  get frontendTechnologies(): string[] {
+  private datePipe: DatePipe = inject(DatePipe);
+  private feTechnologiesVersionsService: FeEngineerFormService = inject(
+    FeEngineerFormService,
+  );
+
+  /**
+   * Getter for the available frontend technologies from the service.
+   * @returns A list of available frontend technologies.
+   */
+  public get frontendTechnologies(): string[] {
     return Object.keys(this.feTechnologiesVersionsService.frontendTechnologies);
   }
 
-  get frontendTechnologyVersions(): string[] {
+  /**
+   * Getter for the versions of the selected frontend technology.
+   * @returns A list of versions for the selected frontend technology.
+   */
+  public get frontendTechnologyVersions(): string[] {
     return this.feTechnologiesVersionsService.frontendTechnologies[
       `${this.form.value.frontendTechnology}`
     ];
   }
 
-  get hobbies(): FormArray {
+  /**
+   * Getter for the hobbies FormArray control.
+   * @returns The FormArray containing hobby controls.
+   */
+  public get hobbies(): FormArray {
     return this.form.get('hobbies') as FormArray;
   }
 
@@ -137,9 +153,14 @@ export class FeEngineerFormComponent implements OnInit {
       this.hobbies.length < 1
     );
   }
+
   //#endregion
 
-  ngOnInit(): void {
+  /**
+   * Sets up a subscription to the 'frontendTechnology' value changes to enable
+   * or disable the 'frontendTechnologyVersion' control.
+   */
+  public ngOnInit(): void {
     this.form.get('frontendTechnology')?.valueChanges.subscribe((value) => {
       const frontendTechnologyVersionControl = this.form.get(
         'frontendTechnologyVersion',
@@ -152,7 +173,9 @@ export class FeEngineerFormComponent implements OnInit {
     });
   }
 
-  // Method to add a new hobby FormGroup
+  /**
+   * Method to add a new hobby to the hobbies FormArray.
+   */
   public addHobby() {
     const hobbyGroup = new FormGroup({
       name: new FormControl('', Validators.required),
@@ -161,12 +184,18 @@ export class FeEngineerFormComponent implements OnInit {
     this.hobbies.push(hobbyGroup);
   }
 
-  // Method to remove a hobby
+  /**
+   * Method to remove a hobby from the hobbies FormArray.
+   * @param index - The index of the hobby to remove from the array.
+   */
   public removeHobby(index: number) {
     this.hobbies.removeAt(index);
   }
 
-  onSubmit() {
+  /**
+   * Method to handle form submission.
+   */
+  public onSubmit() {
     if (this.form.invalid) {
       console.log('INVALID FORM');
       return;
@@ -184,9 +213,8 @@ export class FeEngineerFormComponent implements OnInit {
       framework: this.form.value.frontendTechnology,
       frameworkVersion: this.form.value.frontendTechnologyVersion,
       email: this.form.value.email,
-      hobbies: this.form.value.hobbies
-
-    }
+      hobbies: this.form.value.hobbies,
+    };
 
     console.log(dataFEForm);
   }

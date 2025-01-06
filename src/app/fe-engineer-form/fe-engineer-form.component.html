@@ -1,10 +1,12 @@
 <div class="container-sm">
   <div class="">
     <form (ngSubmit)="onSubmit()" [formGroup]="form" class="row mt-3 g-3">
+      <!-- header -->
       <mat-toolbar>
         <span>Frontend Engineer Form</span>
       </mat-toolbar>
 
+      <!-- name input -->
       <mat-form-field class="col-md-4">
         <mat-label>Name</mat-label>
         <input formControlName="name" matInput/>
@@ -13,8 +15,8 @@
         }
       </mat-form-field>
 
-
-      <mat-form-field  class="col-md-4">
+      <!-- last name input -->
+      <mat-form-field class="col-md-4">
         <mat-label>Last Name</mat-label>
         <input formControlName="lastName" matInput/>
         @if (lastNameIsInvalid) {
@@ -22,7 +24,7 @@
         }
       </mat-form-field>
 
-
+      <!-- date input -->
       <mat-form-field class="col-md-4">
         <mat-label>Choose a date</mat-label>
         <input [formControl]="form.controls.dateOfBirth" [matDatepicker]="picker" matInput>
@@ -34,6 +36,7 @@
         }
       </mat-form-field>
 
+      <!-- frontend technology input -->
       <mat-form-field class="col-md-4">
         <mat-label>Frontend Technology</mat-label>
         <select #frontendTechnology formControlName="frontendTechnology" matNativeControl required>
@@ -46,6 +49,7 @@
         }
       </mat-form-field>
 
+      <!-- frontend technology version input -->
       <mat-form-field class="col-md-4">
         <mat-label>{{ frontendTechnology?.value ? 'Frontend Technology Version' : 'First select a frontend technology' }}</mat-label>
         <select formControlName="frontendTechnologyVersion" matNativeControl required>
@@ -58,6 +62,7 @@
         }
       </mat-form-field>
 
+      <!-- email input -->
       <mat-form-field class="col-md-4">
         <mat-label>Email</mat-label>
         <input formControlName="email" matInput placeholder="Ex. pat@example.com"
@@ -69,7 +74,7 @@
         }
       </mat-form-field>
 
-      <!-- Hobbies Input -->
+      <!-- hobbies Input -->
       <div formArrayName="hobbies">
         @for (hobby of hobbies.controls; track $index) {
           <div [formGroupName]="$index" class="row g-3">
@@ -95,7 +100,8 @@
         }
       </div>
 
-      <button [disabled]="form.invalid" mat-stroked-button class="w-25">Send</button>
+      <!-- submit button -->
+      <button [disabled]="form.invalid" class="w-25" mat-stroked-button>Send</button>
     </form>
   </div>
 </div>
