@@ -174,14 +174,18 @@ export class FeEngineerFormComponent implements OnInit {
       this.form.value.dateOfBirth,
       'dd-MM-yyyy',
     );
-    console.log(
-      this.form.value.name,
-      this.form.value.lastName,
-      formattedDate,
-      this.form.value.frontendTechnology,
-      this.form.value.frontendTechnologyVersion,
-      this.form.value.email,
-      this.form.value.hobbies,
-    );
+
+    const dataFEForm = {
+      firstName: this.form.value.name,
+      lastName: this.form.value.lastName,
+      dateOfBirth: formattedDate,
+      framework: this.form.value.frontendTechnology,
+      frameworkVersion: this.form.value.frontendTechnologyVersion,
+      email: this.form.value.email,
+      hobbies: this.form.value.hobbies
+
+    }
+
+    console.log(dataFEForm);
   }
 }
