@@ -17,6 +17,7 @@ import { of } from 'rxjs';
 import {MatIcon} from '@angular/material/icon';
 import {MatButton, MatIconButton} from '@angular/material/button';
 import {MatToolbar} from '@angular/material/toolbar';
+import {NgbModule} from '@ng-bootstrap/ng-bootstrap';
 
 function emailIsUnique(control: AbstractControl) {
   if (control.value !== 'test@test.test') {
@@ -39,6 +40,7 @@ function emailIsUnique(control: AbstractControl) {
     MatIconButton,
     MatButton,
     MatToolbar,
+    NgbModule
   ],
   templateUrl: './fe-engineer-form.component.html',
   styleUrl: './fe-engineer-form.component.css',
