@@ -10,18 +10,14 @@
       <mat-form-field class="col-md-4">
         <mat-label>Name</mat-label>
         <input formControlName="name" matInput/>
-        @if (nameIsInvalid) {
-          <mat-error>Please enter a valid name.</mat-error>
-        }
+        <mat-error>Please enter a valid name.</mat-error>
       </mat-form-field>
 
       <!-- last name input -->
       <mat-form-field class="col-md-4">
         <mat-label>Last Name</mat-label>
         <input formControlName="lastName" matInput/>
-        @if (lastNameIsInvalid) {
           <mat-error>Please enter a valid last name.</mat-error>
-        }
       </mat-form-field>
 
       <!-- date input -->
@@ -31,9 +27,7 @@
         <mat-hint>MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
-        @if (dateOfBirthIsInvalid) {
           <mat-error>Please enter a valid date of birth.</mat-error>
-        }
       </mat-form-field>
 
       <!-- frontend technology input -->
@@ -44,22 +38,18 @@
             <option [value]="technology">{{ technology.charAt(0).toUpperCase() + technology.slice(1) }}</option>
           }
         </select>
-        @if (frontendTechnologyIsInvalid) {
           <mat-error>Please choose a frontend technology.</mat-error>
-        }
       </mat-form-field>
 
       <!-- frontend technology version input -->
       <mat-form-field class="col-md-4">
         <mat-label>{{ frontendTechnology?.value ? 'Frontend Technology Version' : 'First select a frontend technology' }}</mat-label>
         <select formControlName="frontendTechnologyVersion" matNativeControl required>
-          @for (technologyVersion of frontendTechnologyVersions; track $index) {
+          @for (technologyVersion of frontendTechnologyVersions(); track $index) {
             <option [value]="technologyVersion">{{ technologyVersion }}</option>
           }
         </select>
-        @if (frontendTechnologyVersionIsInvalid) {
           <mat-error>Please choose a frontend technology version.</mat-error>
-        }
       </mat-form-field>
 
       <!-- email input -->
@@ -69,9 +59,8 @@
                type="email">
         @if (form.controls.email.hasError('notUnique')) {
           <mat-error>Please enter an unique email address.</mat-error>
-        } @else if (emailIsInvalid) {
-          <mat-error>Please enter a valid email address.</mat-error>
         }
+          <mat-error>Please enter a valid email address.</mat-error>
       </mat-form-field>
 
       <!-- hobbies Input -->

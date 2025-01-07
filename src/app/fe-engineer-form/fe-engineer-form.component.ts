@@ -1,8 +1,9 @@
 import { FeEngineerFormService } from './fe-engineer-form.service';
+import { emailIsUnique } from './customValidators';
 
 import { Component, inject, OnInit } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import {
-  AbstractControl,
   FormArray,
   FormControl,
   FormGroup,
@@ -11,30 +12,20 @@ import {
 } from '@angular/forms';
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInput, MatInputModule } from '@angular/material/input';
+import { MatInputModule } from '@angular/material/input';
 import { MatNativeDateModule } from '@angular/material/core';
-import { DatePipe } from '@angular/common';
-import { of } from 'rxjs';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatToolbar } from '@angular/material/toolbar';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
-function emailIsUnique(control: AbstractControl) {
-  if (control.value !== 'test@test.test') {
-    return of(null);
-  }
-
-  return of({ notUnique: true });
-}
-
+// todo порядок інстансів
 @Component({
   selector: 'app-fe-engineer-form',
   imports: [
     ReactiveFormsModule,
     MatDatepickerModule,
     MatFormFieldModule,
-    MatInput,
     MatNativeDateModule,
     MatInputModule,
     MatIcon,
@@ -74,77 +65,20 @@ export class FeEngineerFormComponent implements OnInit {
     }),
     hobbies: new FormArray([], Validators.required),
   });
-
+  /**
+   * hobbies FormArray control.
+   */
+  public hobbies: FormArray = this.form.get('hobbies') as FormArray;
   private datePipe: DatePipe = inject(DatePipe);
   private feTechnologiesVersionsService: FeEngineerFormService = inject(
     FeEngineerFormService,
   );
-
   /**
-   * Getter for the available frontend technologies from the service.
-   * @returns A list of available frontend technologies.
+   * Get for the available frontend technologies from the service.
    */
-  public get frontendTechnologies(): string[] {
-    return Object.keys(this.feTechnologiesVersionsService.frontendTechnologies);
-  }
-
-  /**
-   * Getter for the versions of the selected frontend technology.
-   * @returns A list of versions for the selected frontend technology.
-   */
-  public get frontendTechnologyVersions(): string[] {
-    return this.feTechnologiesVersionsService.frontendTechnologies[
-      `${this.form.value.frontendTechnology}`
-    ];
-  }
-
-  /**
-   * Getter for the hobbies FormArray control.
-   * @returns The FormArray containing hobby controls.
-   */
-  public get hobbies(): FormArray {
-    return this.form.get('hobbies') as FormArray;
-  }
-
-  //#region input validator
-  get nameIsInvalid() {
-    return this.form.controls.name.touched || this.form.controls.name.invalid;
-  }
-
-  get lastNameIsInvalid() {
-    return (
-      this.form.controls.lastName.touched || this.form.controls.lastName.invalid
-    );
-  }
-
-  get dateOfBirthIsInvalid() {
-    return (
-      this.form.controls.dateOfBirth.touched ||
-      this.form.controls.dateOfBirth.invalid
-    );
-  }
-
-  get frontendTechnologyIsInvalid() {
-    return (
-      this.form.controls.frontendTechnology.touched ||
-      this.form.controls.frontendTechnology.invalid
-    );
-  }
-
-  get frontendTechnologyVersionIsInvalid() {
-    return (
-      this.form.controls.frontendTechnologyVersion.touched ||
-      this.form.controls.frontendTechnologyVersion.invalid
-    );
-  }
-
-  get emailIsInvalid() {
-    return (
-      this.form.controls.email.touched ||
-      this.form.controls.email.dirty ||
-      this.form.controls.email.invalid
-    );
-  }
+  public frontendTechnologies: string[] = Object.keys(
+    this.feTechnologiesVersionsService.frontendTechnologies,
+  );
 
   get hobbiesIsInvalid() {
     return (
@@ -154,7 +88,14 @@ export class FeEngineerFormComponent implements OnInit {
     );
   }
 
-  //#endregion
+  /**
+   * versions of the selected frontend technology.
+   */
+  public frontendTechnologyVersions(): string[] {
+    return this.feTechnologiesVersionsService.frontendTechnologies[
+      `${this.form.value.frontendTechnology}`
+    ];
+  }
 
   /**
    * Sets up a subscription to the 'frontendTechnology' value changes to enable
@@ -195,6 +136,7 @@ export class FeEngineerFormComponent implements OnInit {
   /**
    * Method to handle form submission.
    */
+  // переробити через спред
   public onSubmit() {
     if (this.form.invalid) {
       console.log('INVALID FORM');
@@ -207,13 +149,8 @@ export class FeEngineerFormComponent implements OnInit {
     );
 
     const dataFEForm = {
-      firstName: this.form.value.name,
-      lastName: this.form.value.lastName,
+      ...this.form.controls,
       dateOfBirth: formattedDate,
-      framework: this.form.value.frontendTechnology,
-      frameworkVersion: this.form.value.frontendTechnologyVersion,
-      email: this.form.value.email,
-      hobbies: this.form.value.hobbies,
     };
 
     console.log(dataFEForm);
