@@ -4,7 +4,7 @@ import { emailIsUnique } from './customValidators';
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {
-  FormArray,
+  FormArray, FormBuilder,
   FormControl,
   FormGroup,
   ReactiveFormsModule,
@@ -40,30 +40,16 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
   standalone: true,
 })
 export class FeEngineerFormComponent implements OnInit {
-  public form = new FormGroup({
-    name: new FormControl<string>('', { validators: [Validators.required] }),
-    lastName: new FormControl<string>('', {
-      validators: [Validators.required],
-    }),
-    dateOfBirth: new FormControl<string>('', {
-      validators: [Validators.required],
-    }),
-    frontendTechnology: new FormControl<typeof this.frontendTechnologies | ''>(
-      '',
-      { validators: [Validators.required] },
-    ),
-    frontendTechnologyVersion: new FormControl<string>(
-      {
-        value: '',
-        disabled: true,
-      },
-      { validators: [Validators.required] },
-    ),
-    email: new FormControl<string>('', {
-      validators: [Validators.required, Validators.email],
-      asyncValidators: emailIsUnique,
-    }),
-    hobbies: new FormArray([], Validators.required),
+  private formBuilder = inject(FormBuilder);
+
+  public form = this.formBuilder.group({
+    name: ['', [Validators.required]],
+    lastName: ['', [Validators.required]],
+    dateOfBirth: ['', [Validators.required]],
+    frontendTechnology: ['', [Validators.required]],
+    frontendTechnologyVersion: [{ value: '', disabled: true }, [Validators.required]],
+    email: ['', [Validators.required, Validators.email], [emailIsUnique]],
+    hobbies: this.formBuilder.array([], Validators.required),
   });
   /**
    * hobbies FormArray control.
@@ -149,7 +135,7 @@ export class FeEngineerFormComponent implements OnInit {
     );
 
     const dataFEForm = {
-      ...this.form.controls,
+      ...this.form.value,
       dateOfBirth: formattedDate,
     };
 
