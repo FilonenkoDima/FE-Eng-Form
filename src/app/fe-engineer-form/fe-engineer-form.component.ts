@@ -5,8 +5,6 @@ import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {
   FormArray, FormBuilder,
-  FormControl,
-  FormGroup,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -104,9 +102,9 @@ export class FeEngineerFormComponent implements OnInit {
    * Method to add a new hobby to the hobbies FormArray.
    */
   public addHobby() {
-    const hobbyGroup = new FormGroup({
-      name: new FormControl('', Validators.required),
-      duration: new FormControl('', Validators.required),
+    const hobbyGroup = this.formBuilder.group({
+      name: ['', [Validators.required]],
+      duration: ['', [Validators.required]],
     });
     this.hobbies.push(hobbyGroup);
   }
