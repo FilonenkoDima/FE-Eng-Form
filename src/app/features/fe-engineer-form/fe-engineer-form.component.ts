@@ -1,10 +1,11 @@
-import { FeEngineerFormService } from './fe-engineer-form.service';
-import { emailIsUnique } from './customValidators';
+import { FeEngineerFormService } from '../../core/services/fe-engineer-form.service';
+import { emailIsUnique } from '../../core/validators/emailUnique.validator';
 
 import { Component, inject, OnInit } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import {
-  FormArray, FormBuilder,
+  FormArray,
+  FormBuilder,
   ReactiveFormsModule,
   Validators,
 } from '@angular/forms';
@@ -17,7 +18,6 @@ import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatToolbar } from '@angular/material/toolbar';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 
-// todo порядок інстансів
 @Component({
   selector: 'app-fe-engineer-form',
   imports: [
@@ -38,48 +38,30 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
   standalone: true,
 })
 export class FeEngineerFormComponent implements OnInit {
-  private formBuilder = inject(FormBuilder);
+  private formBuilder: FormBuilder = inject(FormBuilder);
+  private datePipe: DatePipe = inject(DatePipe);
+  private feTechnologiesVersionsService: FeEngineerFormService = inject(
+    FeEngineerFormService,
+  );
 
+  /** Frontend engineer form. */
   public form = this.formBuilder.group({
     name: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
     dateOfBirth: ['', [Validators.required]],
     frontendTechnology: ['', [Validators.required]],
-    frontendTechnologyVersion: [{ value: '', disabled: true }, [Validators.required]],
+    frontendTechnologyVersion: [
+      { value: '', disabled: true },
+      [Validators.required],
+    ],
     email: ['', [Validators.required, Validators.email], [emailIsUnique]],
     hobbies: this.formBuilder.array([], Validators.required),
   });
-  /**
-   * hobbies FormArray control.
-   */
-  public hobbies: FormArray = this.form.get('hobbies') as FormArray;
-  private datePipe: DatePipe = inject(DatePipe);
-  private feTechnologiesVersionsService: FeEngineerFormService = inject(
-    FeEngineerFormService,
-  );
-  /**
-   * Get for the available frontend technologies from the service.
-   */
+
+  /** Get for the available frontend technologies from the service. */
   public frontendTechnologies: string[] = Object.keys(
     this.feTechnologiesVersionsService.frontendTechnologies,
   );
-
-  get hobbiesIsInvalid() {
-    return (
-      (this.form.controls.hobbies.invalid ||
-        this.form.controls.hobbies.touched) &&
-      this.hobbies.length < 1
-    );
-  }
-
-  /**
-   * versions of the selected frontend technology.
-   */
-  public frontendTechnologyVersions(): string[] {
-    return this.feTechnologiesVersionsService.frontendTechnologies[
-      `${this.form.value.frontendTechnology}`
-    ];
-  }
 
   /**
    * Sets up a subscription to the 'frontendTechnology' value changes to enable
@@ -98,6 +80,22 @@ export class FeEngineerFormComponent implements OnInit {
     });
   }
 
+  /** versions of the selected frontend technology. */
+  public frontendTechnologyVersions(): string[] {
+    return this.feTechnologiesVersionsService.frontendTechnologies[
+      `${this.form.value.frontendTechnology}`
+      ];
+  }
+
+  /** check correct input for hobbies. */
+  public hobbiesIsInvalid() {
+    return (
+      (this.form.controls.hobbies.invalid ||
+        this.form.controls.hobbies.touched) &&
+      (this.form.get('hobbies') as FormArray).length < 1
+    );
+  }
+
   /**
    * Method to add a new hobby to the hobbies FormArray.
    */
@@ -106,21 +104,19 @@ export class FeEngineerFormComponent implements OnInit {
       name: ['', [Validators.required]],
       duration: ['', [Validators.required]],
     });
-    this.hobbies.push(hobbyGroup);
+    (this.form.get('hobbies') as FormArray).push(hobbyGroup);
   }
 
   /**
    * Method to remove a hobby from the hobbies FormArray.
-   * @param index - The index of the hobby to remove from the array.
    */
   public removeHobby(index: number) {
-    this.hobbies.removeAt(index);
+    (this.form.get('hobbies') as FormArray).removeAt(index);
   }
 
   /**
    * Method to handle form submission.
    */
-  // переробити через спред
   public onSubmit() {
     if (this.form.invalid) {
       console.log('INVALID FORM');

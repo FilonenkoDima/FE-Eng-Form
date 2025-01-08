@@ -1,5 +1,5 @@
 import { Injectable } from '@angular/core';
-import {type FrameworkVersions} from './frameworkVersions.type';
+import {type FrameworkVersions} from '../models/frameworkVersions.model';
 
 @Injectable({
   providedIn: 'root'
