@@ -1,5 +1,5 @@
-import {AbstractControl} from '@angular/forms';
-import {of} from 'rxjs';
+import { AbstractControl } from '@angular/forms';
+import { of } from 'rxjs';
 
 export function emailIsUnique(control: AbstractControl) {
   if (control.value !== 'test@test.test') {

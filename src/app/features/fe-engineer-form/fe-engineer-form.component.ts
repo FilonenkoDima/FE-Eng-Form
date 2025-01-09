@@ -1,7 +1,4 @@
-import { FeEngineerFormService } from '../../core/services/fe-engineer-form.service';
-import { emailIsUnique } from '../../core/validators/email-unique.validator';
-
-import { Component, DestroyRef, inject, OnInit } from '@angular/core';
+import { Component, inject, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -21,6 +18,10 @@ import moment from 'moment';
 import { map, Observable, switchMap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
 import { FrameworkVersions } from '../../core/models/framework-versions.model';
+
+import { FeEngineerFormService } from '../../core/services/fe-engineer-form.service';
+import { emailIsUnique } from '../../core/validators/email-unique.validator';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-fe-engineer-form',
@@ -46,7 +47,6 @@ import { FrameworkVersions } from '../../core/models/framework-versions.model';
 })
 export class FeEngineerFormComponent implements OnInit {
   private formBuilder: FormBuilder = inject(FormBuilder);
-  private destroyRef: DestroyRef = inject(DestroyRef);
   private feTechnologiesVersionsService: FeEngineerFormService = inject(
     FeEngineerFormService,
   );
@@ -76,8 +76,7 @@ export class FeEngineerFormComponent implements OnInit {
     this.form.controls.frontendTechnology.valueChanges.pipe(
       switchMap((selectedTechnology) =>
         this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
-          map(
-            (technologies: FrameworkVersions): string[] =>
+          map((technologies: FrameworkVersions): string[] =>
               technologies[selectedTechnology!],
           ),
         ),
@@ -86,12 +85,9 @@ export class FeEngineerFormComponent implements OnInit {
 
   /** check correct input for hobbies. */
   public hobbiesIsInvalid$: Observable<boolean> =
-    this.form.controls.hobbies.statusChanges.pipe(
-      map(
-        () =>
-          (this.form.controls.hobbies.invalid ||
-            this.form.controls.hobbies.touched) &&
-          (this.form.get('hobbies') as FormArray).length < 1,
+    this.form.controls.hobbies.statusChanges.pipe(map(() =>
+        (this.form.controls.hobbies.invalid || this.form.controls.hobbies.touched) &&
+        (this.form.get('hobbies') as FormArray).length < 1,
       ),
     );
 
@@ -102,19 +98,12 @@ export class FeEngineerFormComponent implements OnInit {
   public ngOnInit(): void {
     const frontendTechnologyControl = this.form.get('frontendTechnology');
     if (frontendTechnologyControl) {
-      const FEValueChangesSubscription$ =
-        frontendTechnologyControl.valueChanges.subscribe((value) => {
-          const frontendTechnologyVersionControl = this.form.get(
-            'frontendTechnologyVersion',
-          );
+      frontendTechnologyControl.valueChanges.pipe(takeUntilDestroyed())
+        .subscribe((value) => {const frontendTechnologyVersionControl = this.form.get('frontendTechnologyVersion',);
           if (value) {
             frontendTechnologyVersionControl?.enable();
           }
         });
-
-      this.destroyRef.onDestroy(() =>
-        FEValueChangesSubscription$.unsubscribe(),
-      );
     }
   }
 
@@ -138,7 +127,6 @@ export class FeEngineerFormComponent implements OnInit {
       console.log('INVALID FORM');
       return;
     }
-    console.log(this.form.value.dateOfBirth);
 
     const dataFEForm = {
       ...this.form.value,
