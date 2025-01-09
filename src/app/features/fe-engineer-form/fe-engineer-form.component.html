@@ -1,28 +1,26 @@
 <div class="container-sm">
     <form [formGroup]="form" class="row mt-3 g-3">
       <!-- header -->
-      <mat-toolbar>
-        <span>Frontend Engineer Form</span>
-      </mat-toolbar>
+      <mat-toolbar>Frontend Engineer Form</mat-toolbar>
 
       <!-- name input -->
       <mat-form-field class="col-md-4">
         <mat-label>Name</mat-label>
-        <input formControlName="name" matInput/>
+        <input matInput formControlName="name" />
         <mat-error>Please enter a valid name.</mat-error>
       </mat-form-field>
 
       <!-- last name input -->
       <mat-form-field class="col-md-4">
         <mat-label>Last Name</mat-label>
-        <input formControlName="lastName" matInput/>
+        <input matInput formControlName="lastName" />
         <mat-error>Please enter a valid last name.</mat-error>
       </mat-form-field>
 
       <!-- date date of birth input -->
       <mat-form-field class="col-md-4">
         <mat-label>Enter your date of birth</mat-label>
-        <input [formControl]="form.controls.dateOfBirth" [matDatepicker]="picker" matInput>
+        <input matInput [formControl]="form.controls.dateOfBirth" [matDatepicker]="picker" />
         <mat-hint>MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
@@ -32,11 +30,11 @@
       <!-- frontend technology input -->
       <mat-form-field class="col-md-4">
         <mat-label>Frontend Technology</mat-label>
-        <select #frontendTechnology formControlName="frontendTechnology" matNativeControl>
-          @for (technology of frontendTechnologies | async; track $index) {
-            <option [value]="technology">{{ technology.charAt(0).toUpperCase() + technology.slice(1) }}</option>
+        <mat-select #frontendTechnology formControlName="frontendTechnology">
+          @for (technology of frontendTechnologies$ | async; track $index) {
+            <mat-option [value]="technology">{{ technology.charAt(0).toUpperCase() + technology.slice(1) }}</mat-option>
           }
-        </select>
+        </mat-select>
         <mat-error>Please choose a frontend technology.</mat-error>
       </mat-form-field>
 
@@ -44,7 +42,7 @@
       <mat-form-field class="col-md-4">
         <mat-label>{{ frontendTechnology?.value ? 'Frontend Technology Version' : 'First select a frontend technology' }}</mat-label>
         <mat-select formControlName="frontendTechnologyVersion">
-          @for (technologyVersion of frontendTechnologyVersions() | async; track $index) {
+          @for (technologyVersion of frontendTechnologyVersions$ | async; track $index) {
             <mat-option [value]="technologyVersion">{{ technologyVersion }}</mat-option>
           }
         </mat-select>
@@ -54,8 +52,7 @@
       <!-- email input -->
       <mat-form-field class="col-md-4">
         <mat-label>Email</mat-label>
-        <input formControlName="email" matInput placeholder="Ex. pat@example.com"
-               type="email">
+        <input matInput formControlName="email" placeholder="Ex. pat@example.com" type="email" />
         @if (form.controls.email.hasError('notUnique')) {
           <mat-error>Please enter an unique email address.</mat-error>
         }
@@ -83,8 +80,8 @@
         }
 
         <button (click)="addHobby()" mat-raised-button type="button">Add Hobby</button>
-        @if (hobbiesIsInvalid()) {
-          <mat-error> Please add at least one hobby.</mat-error>
+        @if (hobbiesIsInvalid$ | async) {
+          <mat-error>Please add at least one hobby.</mat-error>
         }
       </div>
 

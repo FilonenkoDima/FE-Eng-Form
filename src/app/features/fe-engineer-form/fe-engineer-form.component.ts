@@ -18,8 +18,9 @@ import { MatToolbar } from '@angular/material/toolbar';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
 import { MatSelect } from '@angular/material/select';
 import moment from 'moment';
-import { map } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { AsyncPipe } from '@angular/common';
+import { FrameworkVersions } from '../../core/models/framework-versions.model';
 
 @Component({
   selector: 'app-fe-engineer-form',
@@ -45,7 +46,7 @@ import { AsyncPipe } from '@angular/common';
 })
 export class FeEngineerFormComponent implements OnInit {
   private formBuilder: FormBuilder = inject(FormBuilder);
-  private destroyRef = inject(DestroyRef);
+  private destroyRef: DestroyRef = inject(DestroyRef);
   private feTechnologiesVersionsService: FeEngineerFormService = inject(
     FeEngineerFormService,
   );
@@ -64,12 +65,35 @@ export class FeEngineerFormComponent implements OnInit {
     hobbies: this.formBuilder.array([], Validators.required),
   });
 
-  public frontendTechnologies =
+  /** Get for the available frontend technologies from the service. */
+  public frontendTechnologies$: Observable<string[]> =
     this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
-      map((data) => Object.keys(data)),
+      map((data: FrameworkVersions): string[] => Object.keys(data)),
     );
 
-  /** Get for the available frontend technologies from the service. */
+  /** Versions of the selected frontend technology. */
+  public frontendTechnologyVersions$: Observable<string[]> =
+    this.form.controls.frontendTechnology.valueChanges.pipe(
+      switchMap((selectedTechnology) =>
+        this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
+          map(
+            (technologies: FrameworkVersions): string[] =>
+              technologies[selectedTechnology!],
+          ),
+        ),
+      ),
+    );
+
+  /** check correct input for hobbies. */
+  public hobbiesIsInvalid$: Observable<boolean> =
+    this.form.controls.hobbies.statusChanges.pipe(
+      map(
+        () =>
+          (this.form.controls.hobbies.invalid ||
+            this.form.controls.hobbies.touched) &&
+          (this.form.get('hobbies') as FormArray).length < 1,
+      ),
+    );
 
   /**
    * Sets up a subscription to the 'frontendTechnology' value changes to enable
@@ -94,25 +118,7 @@ export class FeEngineerFormComponent implements OnInit {
     }
   }
 
-  /** versions of the selected frontend technology. */
-  public frontendTechnologyVersions() {
-    return this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
-      map((technologies) => technologies[this.form.value.frontendTechnology!]),
-    );
-  }
-
-  /** check correct input for hobbies. */
-  public hobbiesIsInvalid() {
-    return (
-      (this.form.controls.hobbies.invalid ||
-        this.form.controls.hobbies.touched) &&
-      (this.form.get('hobbies') as FormArray).length < 1
-    );
-  }
-
-  /**
-   * Method to add a new hobby to the hobbies FormArray.
-   */
+  /** Method to add a new hobby to the hobbies FormArray. */
   public addHobby() {
     const hobbyGroup = this.formBuilder.group({
       name: ['', [Validators.required]],
@@ -121,16 +127,12 @@ export class FeEngineerFormComponent implements OnInit {
     (this.form.get('hobbies') as FormArray).push(hobbyGroup);
   }
 
-  /**
-   * Method to remove a hobby from the hobbies FormArray.
-   */
+  /** Method to remove a hobby from the hobbies FormArray. */
   public removeHobby(index: number) {
     (this.form.get('hobbies') as FormArray).removeAt(index);
   }
 
-  /**
-   * Method to handle form submission.
-   */
+  /** Method to handle form submission. */
   public onSubmit() {
     if (this.form.invalid) {
       console.log('INVALID FORM');
