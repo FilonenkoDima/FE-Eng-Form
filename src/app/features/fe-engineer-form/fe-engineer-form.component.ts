@@ -1,8 +1,7 @@
 import { FeEngineerFormService } from '../../core/services/fe-engineer-form.service';
-import { emailIsUnique } from '../../core/validators/emailUnique.validator';
+import { emailIsUnique } from '../../core/validators/email-unique.validator';
 
-import { Component, inject, OnInit } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { Component, DestroyRef, inject, OnInit } from '@angular/core';
 import {
   FormArray,
   FormBuilder,
@@ -12,11 +11,15 @@ import {
 import { MatDatepickerModule } from '@angular/material/datepicker';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { MatNativeDateModule } from '@angular/material/core';
+import { MatNativeDateModule, MatOption } from '@angular/material/core';
 import { MatIcon } from '@angular/material/icon';
 import { MatButton, MatIconButton } from '@angular/material/button';
 import { MatToolbar } from '@angular/material/toolbar';
 import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
+import { MatSelect } from '@angular/material/select';
+import moment from 'moment';
+import { map } from 'rxjs';
+import { AsyncPipe } from '@angular/common';
 
 @Component({
   selector: 'app-fe-engineer-form',
@@ -31,15 +34,18 @@ import { NgbModule } from '@ng-bootstrap/ng-bootstrap';
     MatButton,
     MatToolbar,
     NgbModule,
+    MatSelect,
+    MatOption,
+    AsyncPipe,
   ],
   templateUrl: './fe-engineer-form.component.html',
   styleUrl: './fe-engineer-form.component.css',
-  providers: [DatePipe],
+  providers: [],
   standalone: true,
 })
 export class FeEngineerFormComponent implements OnInit {
   private formBuilder: FormBuilder = inject(FormBuilder);
-  private datePipe: DatePipe = inject(DatePipe);
+  private destroyRef = inject(DestroyRef);
   private feTechnologiesVersionsService: FeEngineerFormService = inject(
     FeEngineerFormService,
   );
@@ -48,7 +54,7 @@ export class FeEngineerFormComponent implements OnInit {
   public form = this.formBuilder.group({
     name: ['', [Validators.required]],
     lastName: ['', [Validators.required]],
-    dateOfBirth: ['', [Validators.required]],
+    dateOfBirth: [null, [Validators.required]],
     frontendTechnology: ['', [Validators.required]],
     frontendTechnologyVersion: [
       { value: '', disabled: true },
@@ -58,33 +64,41 @@ export class FeEngineerFormComponent implements OnInit {
     hobbies: this.formBuilder.array([], Validators.required),
   });
 
+  public frontendTechnologies =
+    this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
+      map((data) => Object.keys(data)),
+    );
+
   /** Get for the available frontend technologies from the service. */
-  public frontendTechnologies: string[] = Object.keys(
-    this.feTechnologiesVersionsService.frontendTechnologies,
-  );
 
   /**
    * Sets up a subscription to the 'frontendTechnology' value changes to enable
    * or disable the 'frontendTechnologyVersion' control.
    */
   public ngOnInit(): void {
-    this.form.get('frontendTechnology')?.valueChanges.subscribe((value) => {
-      const frontendTechnologyVersionControl = this.form.get(
-        'frontendTechnologyVersion',
+    const frontendTechnologyControl = this.form.get('frontendTechnology');
+    if (frontendTechnologyControl) {
+      const FEValueChangesSubscription$ =
+        frontendTechnologyControl.valueChanges.subscribe((value) => {
+          const frontendTechnologyVersionControl = this.form.get(
+            'frontendTechnologyVersion',
+          );
+          if (value) {
+            frontendTechnologyVersionControl?.enable();
+          }
+        });
+
+      this.destroyRef.onDestroy(() =>
+        FEValueChangesSubscription$.unsubscribe(),
       );
-      if (value) {
-        frontendTechnologyVersionControl?.enable();
-      } else {
-        frontendTechnologyVersionControl?.disable();
-      }
-    });
+    }
   }
 
   /** versions of the selected frontend technology. */
-  public frontendTechnologyVersions(): string[] {
-    return this.feTechnologiesVersionsService.frontendTechnologies[
-      `${this.form.value.frontendTechnology}`
-      ];
+  public frontendTechnologyVersions() {
+    return this.feTechnologiesVersionsService.frontendTechnologies$.pipe(
+      map((technologies) => technologies[this.form.value.frontendTechnology!]),
+    );
   }
 
   /** check correct input for hobbies. */
@@ -122,15 +136,11 @@ export class FeEngineerFormComponent implements OnInit {
       console.log('INVALID FORM');
       return;
     }
-
-    const formattedDate = this.datePipe.transform(
-      this.form.value.dateOfBirth,
-      'dd-MM-yyyy',
-    );
+    console.log(this.form.value.dateOfBirth);
 
     const dataFEForm = {
       ...this.form.value,
-      dateOfBirth: formattedDate,
+      dateOfBirth: moment(this.form.value.dateOfBirth).format('MM-DD-YYYY'),
     };
 
     console.log(dataFEForm);

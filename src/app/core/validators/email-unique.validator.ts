@@ -6,5 +6,5 @@ export function emailIsUnique(control: AbstractControl) {
     return of(null);
   }
 
-  return of({notUnique: true});
+  return of({ notUnique: true });
 }

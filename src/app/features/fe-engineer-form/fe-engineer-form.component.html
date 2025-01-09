@@ -1,5 +1,4 @@
 <div class="container-sm">
-  <div class="">
     <form [formGroup]="form" class="row mt-3 g-3">
       <!-- header -->
       <mat-toolbar>
@@ -17,39 +16,39 @@
       <mat-form-field class="col-md-4">
         <mat-label>Last Name</mat-label>
         <input formControlName="lastName" matInput/>
-          <mat-error>Please enter a valid last name.</mat-error>
+        <mat-error>Please enter a valid last name.</mat-error>
       </mat-form-field>
 
-      <!-- date input -->
+      <!-- date date of birth input -->
       <mat-form-field class="col-md-4">
-        <mat-label>Choose a date</mat-label>
+        <mat-label>Enter your date of birth</mat-label>
         <input [formControl]="form.controls.dateOfBirth" [matDatepicker]="picker" matInput>
         <mat-hint>MM/DD/YYYY</mat-hint>
         <mat-datepicker-toggle [for]="picker" matIconSuffix></mat-datepicker-toggle>
         <mat-datepicker #picker></mat-datepicker>
-          <mat-error>Please enter a valid date of birth.</mat-error>
+        <mat-error>Please enter a valid date of birth.</mat-error>
       </mat-form-field>
 
       <!-- frontend technology input -->
       <mat-form-field class="col-md-4">
         <mat-label>Frontend Technology</mat-label>
-        <select #frontendTechnology formControlName="frontendTechnology" matNativeControl required>
-          @for (technology of frontendTechnologies; track $index) {
+        <select #frontendTechnology formControlName="frontendTechnology" matNativeControl>
+          @for (technology of frontendTechnologies | async; track $index) {
             <option [value]="technology">{{ technology.charAt(0).toUpperCase() + technology.slice(1) }}</option>
           }
         </select>
-          <mat-error>Please choose a frontend technology.</mat-error>
+        <mat-error>Please choose a frontend technology.</mat-error>
       </mat-form-field>
 
       <!-- frontend technology version input -->
       <mat-form-field class="col-md-4">
         <mat-label>{{ frontendTechnology?.value ? 'Frontend Technology Version' : 'First select a frontend technology' }}</mat-label>
-        <select formControlName="frontendTechnologyVersion" matNativeControl required>
-          @for (technologyVersion of frontendTechnologyVersions(); track $index) {
-            <option [value]="technologyVersion">{{ technologyVersion }}</option>
+        <mat-select formControlName="frontendTechnologyVersion">
+          @for (technologyVersion of frontendTechnologyVersions() | async; track $index) {
+            <mat-option [value]="technologyVersion">{{ technologyVersion }}</mat-option>
           }
-        </select>
-          <mat-error>Please choose a frontend technology version.</mat-error>
+        </mat-select>
+        <mat-error>Please choose a frontend technology version.</mat-error>
       </mat-form-field>
 
       <!-- email input -->
@@ -60,7 +59,7 @@
         @if (form.controls.email.hasError('notUnique')) {
           <mat-error>Please enter an unique email address.</mat-error>
         }
-          <mat-error>Please enter a valid email address.</mat-error>
+        <mat-error>Please enter a valid email address.</mat-error>
       </mat-form-field>
 
       <!-- hobbies Input -->
@@ -92,5 +91,4 @@
       <!-- submit button -->
       <button [disabled]="form.invalid" class="w-25" mat-stroked-button (click)="onSubmit()">Send</button>
     </form>
-  </div>
 </div>
